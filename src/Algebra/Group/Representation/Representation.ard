@@ -8,6 +8,7 @@
 \import Algebra.Monoid.Sub
 \import Algebra.Pointed
 \import Algebra.Ring
+\import Arith.Nat
 \import Equiv
 \import Function
 \import Function.Meta ($)
@@ -19,6 +20,9 @@
 \import Set
 \import Algebra.Monoid
 \import Set.Category
+
+-- basic reference right now is https://www.uni-math.gwdg.de/tammo/rep.pdf
+-- REPRESENTATION THEORY Tammo tom Dieck
 
 \record LinRepres (R : Ring) (G : Group){
   | E : LModule R
@@ -38,20 +42,20 @@
 
 
 \class RepresentationTheory \noclassifying {R : Ring} (G : Group){
-
   \func R_m => RingLModule R
 
   \func Irred (E : LinRepres R G) => \Pi (S : SubRepres E) -> \Sigma (TrivSubModule S.S) (NonProperSubModule S.S)
 
-  -- \instance PowerLModule {R : Ring} (J : \Set) (M : LModule R) : LModule R (J -> M)
-  -- \func RingLModule (R : Ring) : LModule R R \cowith
+ {- | Action given as $$g \cdot \left( \sum \lambda_i x_i \right) := \sum \lambda_{g^{-1}(i)}x_i $$ -} -}
   \func PermutationRepresentation (X : GroupAction G) : LinRepres R G \cowith
-    | E => PowerLModule X R_m
-    | ** g f j => f (g X.** j)
-    | **-assoc => {?}
-    | id-action => {?}
-    | lin => {?}
+    | E : LModule => PowerLModule X R_m
+    | ** g f j => f (inverse g X.** j)
+    | **-assoc => ext (\lam j => rewrite (X.**-assoc, inverse_prod) idp)
+    | id-action => ext (\lam j => rewrite (G.inverse_ide, X.id-action) idp)
+    | lin => idp
+    \where \func inverse_prod {m n : G} : inverse (m * n) = inverse n * inverse m =>  {?}
 
-
-
+  \func SubRepresentation-Of-Permutation (X : GroupAction G) : SubRepres (PermutationRepresentation X) \cowith
+    | S => {?}
+    | contains_act => {?}
 }
