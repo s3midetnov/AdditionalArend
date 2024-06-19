@@ -17,5 +17,6 @@
         <option name="showTypesInLambda" value="true" />
       </ArendPrintingOptions>
     </option>
+    <option name="showImplicitGoals" value="true" />
   </component>
 </project>
