@@ -1,0 +1,52 @@
+\import Algebra.Group
+\import Algebra.Group.Representation.GSet
+\import Algebra.Group.Representation.Representation
+\import Algebra.Group.Sub
+\import Algebra.Meta
+\import Algebra.Module
+\import Algebra.Module.Sub
+\import Algebra.Monoid
+\import Algebra.Monoid.Sub
+\import Algebra.Pointed
+\import Algebra.Ring
+\import Arith.Nat
+\import Equiv
+\import Function
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Paths
+\import Paths.Meta
+\import Relation.Equivalence
+\import Set
+\import Algebra.Monoid
+\import Set.Category
+
+
+\class PermutationRepr \noclassifying {R : Ring} {G : Group} (X : GroupAction G){
+  \func R_m : LModule R => RingLModule R
+  \func Module : LModule R => PowerLModule X R_m
+
+  {- | Action given as $$g \cdot \left( \sum \lambda_i x_i \right) := \sum \lambda_{g^{-1}(i)}x_i $$ -} -}
+  \func Repr : LinRepres R G \cowith
+    | E : LModule => Module
+    | ** g f j => f (inverse g X.** j)
+    | **-assoc => ext (\lam j => rewrite (X.**-assoc, inverse_prod) idp)
+    | id-action => ext (\lam j => rewrite (G.inverse_ide, X.id-action) idp)
+    | lin => idp
+    \where \func inverse_prod {m n : G} : inverse (m * n) = inverse n * inverse m =>  {?}
+
+  \func LinearInvSubspace : SubLModule R (PowerLModule X R_m) => LinearSubmodule (\lam _ => R.ide)
+
+  \lemma Invariance {v : Module}{g : G} (p : LinearInvSubspace.contains v)  : g Repr.** v = v => {?}
+
+
+  \func SubRepresentation-Of-Permutation (X : GroupAction G) : SubRepres Repr \cowith
+    | S => LinearInvSubspace
+    | contains_act {g} {s} => \lam p => \case \elim  p \with {
+      | inP r => inP (r.1, inv (g Repr.** s ==< Invariance (inP r) >== s ==< inv r.2 >== r.1 * (\lam _ => R.ide) `qed))
+    }
+    \where \func Line : SubLModule => LinearSubmodule {R} {PowerLModule X R_m} (\lam _ => R.ide)
+
+}
+
