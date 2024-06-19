@@ -1,0 +1,41 @@
+\import Algebra.Group
+\import Algebra.Group.Sub
+\import Algebra.Meta
+\import Algebra.Module
+\import Algebra.Module.Sub
+\import Algebra.Monoid
+\import Algebra.Monoid.Sub
+\import Algebra.Pointed
+\import Algebra.Ring
+\import Equiv
+\import Function
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Paths
+\import Paths.Meta
+\import Relation.Equivalence
+\import Set
+\import Algebra.Monoid
+\import Set.Category
+
+\record Repres (R : Ring)(G : Group){
+  | E : LModule R
+  | \infixl 8 ** : G -> E -> E
+  | **-assoc {m n : G} {e : E} : m ** (n ** e) = (m * n) ** e
+  | id-action {e : E} : ide ** e = e
+  | lin {g : G} {e e' : E} : g ** (e + e') = g ** e + g ** e'
+}
+
+\record SubRepres {R : Ring}{G : Group}(E : Repres R G){
+  | S : SubLModule R E.E
+  | contains_act {g : G} {s : E.E} : S.contains s -> S.contains (g ** s)
+}
+
+\func TrivSubModule{R : Ring}{L : LModule R}(E : SubLModule R L) : \Prop => \Pi(e : E.S) -> e = 0
+\func NonProperSubModule{R : Ring}{L : LModule R}(E : SubLModule R L) : \Prop => \Pi (s : L) -> E.contains s
+
+
+\class RepresentationTheory \noclassifying {R : Ring} (G : Group){
+  \func Irred (E : Repres R G) => \Pi (S : SubRepres E) -> \Sigma (TrivSubModule S.S) (NonProperSubModule S.S)
+}

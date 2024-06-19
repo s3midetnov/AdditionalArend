@@ -1,0 +1,103 @@
+\import Algebra.Group
+\import Algebra.Meta
+\import Algebra.Monoid
+\import Algebra.Monoid.Sub
+\import Function.Meta
+\import Meta
+\import Paths
+\import Paths.Meta
+\import Relation.Equivalence
+\import Set
+\open Group
+
+\class SubGroup \extends SubMonoid {
+  \override S : Group
+  | contains_inverse {x : S} : contains x -> contains (inverse x)
+
+  \func struct : Group \cowith
+    | Monoid => SubMonoid.struct
+    | inverse x => (inverse x.1, contains_inverse x.2)
+    | inverse-left => ext inverse-left
+    | inverse-right => ext inverse-right
+
+  \func equivalence : Equivalence S \cowith
+    | ~ x y => contains (inverse x * y)
+    | ~-reflexive => transportInv contains inverse-left contains_ide
+    | ~-symmetric c => transport contains (inverse_* *> pmap (_ *) inverse-isInv) (contains_inverse c)
+    | ~-transitive {x} {y} c1 c2 => rewriteEq (inverse-right {S} {y}, ide-left) in contains_* c1 c2
+
+  \func Cosets => Quotient (equivalence.~)
+} \where {
+  \func cStruct {G : CGroup} (S : SubGroup G) : CGroup \cowith
+    | Group => S.struct
+    | *-comm => ext *-comm
+}
+
+\class DecSubGroup \extends SubGroup, DecSubMonoid {
+  \override S : Group
+}
+
+\class NormalSubGroup \extends SubGroup {
+  | isNormal (g : S) {h : S} : contains h -> contains (conjugate g h)
+
+  \lemma isNormal' (g : S) {h : S} (c : contains h) : contains (g * h * inverse g)
+    => simplify in isNormal (inverse g) c
+
+  \func quotient : Group Cosets \cowith
+    | ide => in~ 1
+    | * (x y : Cosets) : Cosets \with {
+      | in~ g, in~ g' => in~ (g Group.* g')
+      | in~ g, ~-equiv x y r => ~-pequiv $ rewriteEq (inverse_*, inverse-left {S} {g}, ide-left) r
+      | ~-equiv x y r, in~ g => ~-pequiv $ rewriteEq inverse_* $ transport contains equation (isNormal g r)
+    }
+    | ide-left {x} => cases x \with {
+      | in~ a => pmap in~ ide-left
+    }
+    | ide-right {x} => cases x \with {
+      | in~ a => pmap in~ ide-right
+    }
+    | *-assoc {x} {y} {z} => cases (x,y,z) \with {
+      | in~ x, in~ y, in~ z => pmap in~ *-assoc
+    }
+    | inverse (x : Cosets) : Cosets \with {
+      | in~ g => in~ (Group.inverse g)
+      | ~-equiv x y r => ~-pequiv $ rewrite inverse-isInv $ rewriteEq (inverse_*, inverse-isInv) in
+                                    contains_inverse (rewriteEq (inverse-right {S} {x}, ide-left) in isNormal' x r)
+    }
+    | inverse-left {x} => cases x \with {
+      | in~ a => pmap in~ inverse-left
+    }
+    | inverse-right {x} => cases x \with {
+      | in~ a => pmap in~ inverse-right
+    }
+}
+
+\class SubAddGroup \extends SubAddMonoid {
+  \override S : AddGroup
+  | contains_negative {x : S} : contains x -> contains (negative x)
+
+  \lemma contains_- {x y : S} : contains x -> contains y -> contains (x - y)
+    => \lam cx cy => contains_+ cx (contains_negative cy)
+
+  \func struct : AddGroup \cowith
+    | AddMonoid => SubAddMonoid.struct
+    | negative x => (negative x.1, contains_negative x.2)
+    | negative-left => ext negative-left
+    | negative-right => ext negative-right
+} \where {
+  \func abStruct {A : AbGroup} (S : SubAddGroup A) : AbGroup \cowith
+    | AddGroup => S.struct
+    | +-comm => ext +-comm
+
+  \func max {A : AddGroup} : SubAddGroup \cowith
+    | SubAddMonoid => SubAddMonoid.max {A}
+    | contains_negative _ => ()
+}
+
+\class FinSubGroup \extends DecSubGroup {
+  \override S : FinGroup
+
+  \func struct : FinGroup \cowith
+    | Group => SubGroup.struct
+    | FinSet => DecSubSet.isFin S \this
+}
