@@ -1,0 +1,66 @@
+\import Algebra.Group
+\import Algebra.Group.Category
+\import Algebra.Group.Representation.Category
+\import Algebra.Group.Representation.Representation
+\import Algebra.Group.Representation.Sub
+\import Algebra.Group.Sub
+\import Algebra.Meta
+\import Algebra.Module
+\import Algebra.Module.Category
+\import Algebra.Module.LinearMap
+\import Algebra.Module.Sub
+\import Algebra.Monoid
+\import Algebra.Monoid.Sub
+\import Algebra.Pointed
+\import Algebra.Ring
+\import Arith.Nat
+\import Category
+\import Equiv
+\import Function
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Paths
+\import Paths.Meta
+\import Relation.Equivalence
+\import Set
+\import Algebra.Monoid
+\import Algebra.Group.Representation.LinearAlgFacts
+\open Algebra.Group.Representation.Representation
+
+\class IrreducibleRepr {R : Ring} (G : Group) (\classifying  E : LinRepres R G){
+  | irred : isIrreducible E
+}
+\func auxillary-Lemma {A B : \Prop} (p : A || B)(q : Not A) : B => \case  p \with {
+  | byLeft a => absurd (q a) -- everything follows from false
+  | byRight b => b
+}
+
+\class Shur's-Lemma {R : Ring}{G : Group}{
+ | E : IrreducibleRepr {R} G
+ | E' : IrreducibleRepr {R} G
+ | f : InterwiningMap E E'
+ | non-zero-repr : ∃(e : E) (e /= 0)
+
+ \func Ker : SubLModule R E => Kernel-SubM f
+ \func Im : SubLModule R E' => Image-SubM f
+
+ \func AllIsKernel=>ZeroMap (p : \Pi(v : E) -> Ker.contains v) : isZeroMap f => {?}
+ \func ZeroKernel=>NonZeroIm (p : \Pi (v : E) -> Ker.contains v -> v = 0) :
+   Not (\Pi (v : E') -> Im.contains v -> v = 0) => {?}
+
+\lemma Im/=0-then-Im=All (p : Not (\Pi (v : E') -> Im.contains v -> v = 0)) : \Pi (e' : E') -> Im.contains e' => {?}
+
+\lemma ZeroKer-FullImage==>Iso
+   (p : \Pi(v : E) -> Ker.contains v -> v = 0) (q : \Pi (v : E') -> Im.contains v) : Iso f => {?}
+
+  \func Schur's-Lemma : isZeroMap f || Iso f => \case kernel-is-trivial \with {
+    | byLeft zero-subm => byRight (ZeroKer-FullImage==>Iso zero-subm (Im/=0-then-Im=All (ZeroKernel=>NonZeroIm zero-subm)))
+    | byRight all-subm => byLeft (AllIsKernel=>ZeroMap all-subm)
+  }
+
+ \func kernel-is-trivial : isTrivial (Kernel-SubM f) => E.irred (KernelSubRepr f)
+  \func image-is-trivial : isTrivial (Image-SubM f) => E'.irred (ImageSubRepr f)
+}
+
+

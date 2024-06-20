@@ -10,6 +10,7 @@
 \import Algebra.Pointed
 \import Algebra.Ring
 \import Arith.Nat
+\import Data.List
 \import Equiv
 \import Function
 \import Function.Meta ($)
@@ -22,34 +23,47 @@
 \import Algebra.Monoid
 \import Set.Category
 
+-- *c_zro-left = zero-mu
 
-
-\lemma zero-mu {R : Ring}{L : LModule R} {v : L} : 0 *c v = 0 => {?}
+\func isZeroMap {R : Ring} {A B : LModule R} (f : LinearMap A B) => \Pi (a : A) -> f a = 0
 
 \func OneDimSubmod{R : Ring} {L : LModule R} (v : L) : SubLModule R L \cowith
   | contains u => ∃(r : R)(r *c v = u)
-  | contains_zro => inP(0, zero-mu)
+  | contains_zro => inP(0, L.*c_zro-left)
   | contains_+ p q => \case \elim p, \elim q \with {
     | inP r1, inP r2 => inP (r1.1 + r2.1, rewrite (*c-rdistr, r1.2, r2.2) idp)
   }
   | contains_negative p => \case \elim p \with {
-    | inP r => inP  (negative r.1, rewrite () {?})
+    | inP r => inP  (negative r.1, rewrite (L.*c_negative-left, pmap L.negative r.2) idp)
   }
   | contains_*c {a : R} {s : L} p => \case \elim p \with {
     | inP r => inP(a * r.1, rewrite (L.*c-assoc, r.2) idp)
   }
 
 \func isTrivial {R : Ring} {E : LModule R} (S : SubLModule R E)
-  => \Sigma (\Pi (v : E) -> S.contains v -> v = 0) (\Pi (v : E) -> S.contains v)
+  => (\Pi (v : E) -> S.contains v -> v = 0) ||  (\Pi (v : E) -> S.contains v)
 
 \func OneDimSubmod-isNot-Trivial {R : Ring} {L : LModule R}(v : L)(p : Not (v = 0)) :
   Not (isTrivial (OneDimSubmod v)) => {?}
 
-
+-- for Schur's Lemma
 \func Kernel-SubM {R : Ring} {A B : LModule R}(f : LinearMap A B) : SubLModule R A \cowith
-  | contains_*c => {?}
-  | contains => {?}
-  | contains_zro => {?}
-  | contains_+ => {?}
-  | contains_negative => {?}
+  | contains a => f a = 0
+  | contains_*c p => rewrite (f.func-*c, p, B.*c_zro-right) idp
+  | contains_zro => f.func-zro
+  | contains_+  p p' => rewrite (f.func-+, p, p', B.zro-right) idp
+  | contains_negative p => rewrite (f.func-negative, p, B.negative_zro) idp
 
+-- for Schur's Lemma
+\func Image-SubM {R : Ring} {A B : LModule R}(f : LinearMap A B) : SubLModule R B \cowith
+  | contains b => ∃ (a : A)(f a = b)
+  | contains_zro => inP (0, f.func-zro)
+  | contains_+ p p' => \case \elim  p,  \elim p' \with {
+    | inP p, inP p' => inP (p.1 + p'.1, rewrite (f.func-+, p.2, p'.2) idp)
+  }
+  | contains_negative p => \case \elim p \with {
+    | inP p => inP (negative p.1, rewrite (f.func-negative, p.2) idp)
+  }
+  | contains_*c {c} p => \case \elim p \with {
+    | inP p => inP (c *c p.1, rewrite (f.func-*c, p.2) idp)
+  }

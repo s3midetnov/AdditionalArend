@@ -43,18 +43,29 @@
   -- now we present an invariant subspace of permutation representation
 
   \func Span-submod : SubLModule R Module => OneDimSubmod (\lam _ => R.ide)
+  \func form-of-element (v : Module) : ∃(r : R) (\Pi (j : X) -> v j = r) -> Span-submod.contains v  => {?}
 
-  \func Span-submod-Is-Fixed : \Pi(x : Module)(g : G) -> Span-submod.contains x -> Span-submod.contains (g Repr.** x) => {?}
+
+
+  --  ∃(r : R)(r *c v = u)
+  \func Span-submod-Is-Fixed :
+      \Pi(x : Module)(g : G) -> Span-submod.contains x -> g Repr.** x = x
+      => \lam (x : Module) (g : G) (p : Span-submod.contains x) => ext (\lam j => rewrite () {?})
+--          \where \func helper (v : Module) (p : ∃(r : R)(r *c v = u))
 
   \func Span-submod-Is-Invariant : SubRepresentation Repr => fixed=>invariant Span-submod Span-submod-Is-Fixed
 
-  \func Span-submod-not-trivial : Not (isTrivial Span-submod) => {?}
+  \func Span-submod-Is-Invariant' : SubRepresentation Repr \cowith
+    | S => Span-submod
+    | invariance => \lam {e}{g} p => \case \elim p \with{
+      | inP r1_r2 => form-of-element (g Repr.** e) (inP (r1_r2.1, \lam j => rewrite () {?}))
+    }
 
-  \lemma A-and-NotA=>False {A : \Prop} (p : A)(q : Not A) : Empty => q p
+    \func Span-submod-not-trivial : Not (isTrivial Span-submod) => {?}
 
   {- | $span (1, 1, \ldots)^T$ is an invariant subspace => permutation representation is not irreducible -}
   \func Permutation-Repr-Reducible : Not (isIrreducible Repr) =>
-    \lam proof-irred => A-and-NotA=>False (proof-irred Span-submod-Is-Invariant) Span-submod-not-trivial -- Span-submod-not-trivial proof-irred
+    \lam proof-irred => Span-submod-not-trivial (proof-irred Span-submod-Is-Invariant)  -- Span-submod-not-trivial proof-irred
 }
 
 

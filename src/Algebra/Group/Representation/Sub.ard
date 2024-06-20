@@ -35,11 +35,19 @@
 }
 \func KernelSubRepr {R : Ring} {G : Group} {E E' : LinRepres R G} (f : InterwiningMap E E') : SubRepresentation E \cowith
   | S => Kernel-SubM f
-  | invariance => {?}
+  | invariance {e : E} {g : G} (p : f e = 0) => helper p -- it does not allow me to write body of helper here, strange
+  \where
+      \func helper {e : E} {g : G} (p : f e = 0) : f (g ** e) = 0 => rewrite (f.func-**, pmap (g **) p, E'.g**-zro) idp
+
+\func ImageSubRepr {R : Ring} {G : Group} {E E' : LinRepres R G} (f : InterwiningMap E E') : SubRepresentation E' \cowith
+  | S => Image-SubM f
+  | invariance {e' : E'} {g : G} (p : ∃(e : E)(f e = e')) => \case \elim  p \with {
+    | inP p => inP (g E.** p.1, rewrite (f.func-**, p.2) idp)
+  }
 
 \func isIrreducible {R : Ring}{G : Group} (E : LinRepres R G) :\Prop => \Pi(F : SubRepresentation E) -> isTrivial F.S
 
 -- auxillary lemma that if f x = x then the subpace of x's is invariant
 \func fixed=>invariant {R : Ring} {G : Group} {E : LinRepres R G}
                        (F : SubLModule R E)
-                       (p : \Pi (x : E) (g : G) -> F.contains x -> F.contains (g ** x)) : SubRepresentation E {| S => F} => {?}
+                       (p : \Pi (x : E) (g : G) -> F.contains x -> g ** x = x) : SubRepresentation E {| S => F} => {?}

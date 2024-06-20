@@ -29,6 +29,8 @@
   | **-assoc {m n : G} {e : E} : m ** (n ** e) = (m * n) ** e
   | id-action {e : E} : ide ** e = e
   | lin {g : G} {e e' : E} : g ** (e + e') = g ** e + g ** e'
+
+  \func g**-zro {g : G} : g ** 0 = 0 => {?}
 }
 
 
