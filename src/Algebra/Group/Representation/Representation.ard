@@ -24,16 +24,15 @@
 -- basic reference right now is https://www.uni-math.gwdg.de/tammo/rep.pdf
 -- REPRESENTATION THEORY Tammo tom Dieck
 
-\record LinRepres (R : Ring) (G : Group){
-  | E : LModule R
-  | \infixl 8 ** : G -> E -> E
-  | **-assoc {m n : G} {e : E} : m ** (n ** e) = (m * n) ** e
-  | id-action {e : E} : ide ** e = e
-  | lin {g : G} {e e' : E} : g ** (e + e') = g ** e + g ** e'
-}
+--\record LinRepres (R : Ring) (G : Group) \extends  LModule {
+--  | \infixl 8 ** : G -> E -> E
+--  | **-assoc {m n : G} {e : E} : m ** (n ** e) = (m * n) ** e
+--  | id-action {e : E} : ide ** e = e
+--  | lin {g : G} {e e' : E} : g ** (e + e') = g ** e + g ** e'
+--}
 
 \record SubRepres {R : Ring}{G : Group}(E : LinRepres R G){
-  | S : SubLModule R E.E
+  | S : SubLModule R E
   | contains_act {g : G} {s : E.E} : S.contains s -> S.contains (g ** s)
 }
 -- Linear algebra
@@ -41,23 +40,8 @@
 \func TrivSubModule{R : Ring}{L : LModule R}(E : SubLModule R L) : \Prop => \Pi(e : E.S) -> e = 0
 \func NonProperSubModule{R : Ring}{L : LModule R}(E : SubLModule R L) : \Prop => \Pi (s : L) -> E.contains s
 
-\lemma zero-mu{L : LModule} {v : L} : 0 *c v = 0 => {?}
 
-\func LinearSubmodule{R : Ring}{L : LModule R} (v : L) : SubLModule R L \cowith
-  | contains u => ∃(r : R)(r *c v = u)
-  | contains_zro => inP(0, zero-mu)
-  | contains_+ p q => \case \elim p, \elim q \with {
-    | inP r1, inP r2 => inP (r1.1 + r2.1, rewrite (*c-rdistr, r1.2, r2.2) idp)
-  }
-  | contains_negative p => \case \elim p \with {
-    | inP r => inP  (negative r.1, rewrite () {?})
-  }
-  | contains_*c {a : R} {s : L} p => \case \elim p \with {
-    | inP r => inP(a * r.1, rewrite (L.*c-assoc, r.2) idp)
-  }
 
-\class RepresentationTheory \noclassifying {R : Ring} (G : Group){
-  \func R_m => RingLModule R
 
-  \func Irred (E : LinRepres R G) => \Pi (S : SubRepres E) -> \Sigma (TrivSubModule S.S) (NonProperSubModule S.S)
-}
+
+  \func Irred {R : Ring} {G : Group} (E : LinRepres R G) => \Pi (S : SubRepres E) -> \Sigma (TrivSubModule S.S) (NonProperSubModule S.S)

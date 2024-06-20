@@ -1,0 +1,55 @@
+\import Algebra.Group
+\import Algebra.Group.Representation.GSet
+\import Algebra.Group.Sub
+\import Algebra.Meta
+\import Algebra.Module
+\import Algebra.Module.LinearMap
+\import Algebra.Module.Sub
+\import Algebra.Monoid
+\import Algebra.Monoid.Sub
+\import Algebra.Pointed
+\import Algebra.Ring
+\import Arith.Nat
+\import Equiv
+\import Function
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Paths
+\import Paths.Meta
+\import Relation.Equivalence
+\import Set
+\import Algebra.Monoid
+\import Set.Category
+
+
+
+\lemma zero-mu {R : Ring}{L : LModule R} {v : L} : 0 *c v = 0 => {?}
+
+\func OneDimSubmod{R : Ring} {L : LModule R} (v : L) : SubLModule R L \cowith
+  | contains u => ∃(r : R)(r *c v = u)
+  | contains_zro => inP(0, zero-mu)
+  | contains_+ p q => \case \elim p, \elim q \with {
+    | inP r1, inP r2 => inP (r1.1 + r2.1, rewrite (*c-rdistr, r1.2, r2.2) idp)
+  }
+  | contains_negative p => \case \elim p \with {
+    | inP r => inP  (negative r.1, rewrite () {?})
+  }
+  | contains_*c {a : R} {s : L} p => \case \elim p \with {
+    | inP r => inP(a * r.1, rewrite (L.*c-assoc, r.2) idp)
+  }
+
+\func isTrivial {R : Ring} {E : LModule R} (S : SubLModule R E)
+  => \Sigma (\Pi (v : E) -> S.contains v -> v = 0) (\Pi (v : E) -> S.contains v) -- trivial subrepresentation
+
+\func OneDimSubmod-isNot-Trivial {R : Ring} {L : LModule R}(v : L)(p : Not (v = 0)) :
+  Not (isTrivial (OneDimSubmod v)) => {?}
+
+
+\func Kernel-SubM {R : Ring} {A B : LModule R}(f : LinearMap A B) : SubLModule R A \cowith
+  | contains_*c => {?}
+  | contains => {?}
+  | contains_zro => {?}
+  | contains_+ => {?}
+  | contains_negative => {?}
+

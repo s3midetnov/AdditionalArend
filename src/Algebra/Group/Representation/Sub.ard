@@ -1,0 +1,45 @@
+\import Algebra.Group
+\import Algebra.Group.Category
+\import Algebra.Group.Representation.Category
+\import Algebra.Group.Representation.LRepresentation
+\import Algebra.Group.Sub
+\import Algebra.Meta
+\import Algebra.Module
+\import Algebra.Module.Category
+\import Algebra.Module.LinearMap
+\import Algebra.Module.Sub
+\import Algebra.Monoid
+\import Algebra.Monoid.Sub
+\import Algebra.Pointed
+\import Algebra.Ring
+\import Arith.Nat
+\import Equiv
+\import Function
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Paths
+\import Paths.Meta
+\import Relation.Equivalence
+\import Set
+\import Algebra.Monoid
+\import Algebra.Group.Representation.LinearAlgFacts
+\open Algebra.Group.Representation.LRepresentation
+
+
+\class SubRepresentation {R : Ring} {G : Group} (E : LinRepres R G) {
+  | S : SubLModule R E
+  | invariance {e : E} {g : G} : S.contains e -> S.contains (g ** e)
+
+
+}
+\func KernelSubRepr {R : Ring} {G : Group} {E E' : LinRepres R G} (f : InterwiningMap E E') : SubRepresentation E \cowith
+  | S => Kernel-SubM f
+  | invariance => {?}
+
+\func isIrreducible {R : Ring}{G : Group} (E : LinRepres R G) :\Prop => \Pi(F : SubRepresentation E) -> isTrivial F.S
+
+-- auxillary lemma that if f x = x then the subpace of x's is invariant
+\func fixed=>invariant {R : Ring} {G : Group} {E : LinRepres R G}
+                       (F : SubLModule R E)
+                       (p : \Pi (x : E) (g : G) -> F.contains x -> F.contains (g ** x)) : SubRepresentation E {| S => F} => {?}

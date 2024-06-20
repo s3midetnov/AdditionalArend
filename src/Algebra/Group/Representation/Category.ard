@@ -1,0 +1,61 @@
+\import Algebra.Group
+\import Algebra.Group.Representation.GSet
+\import Algebra.Group.Representation.LRepresentation
+\import Algebra.Group.Sub
+\import Algebra.Meta
+\import Algebra.Module
+\import Algebra.Module.LinearMap
+\import Algebra.Module.Sub
+\import Algebra.Monoid
+\import Algebra.Monoid.Sub
+\import Algebra.Pointed
+\import Algebra.Ring
+\import Arith.Nat
+\import Category
+\import Category.Meta
+\import Equiv
+\import Function
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Paths
+\import Paths.Meta
+\import Relation.Equivalence
+\import Set
+\import Algebra.Monoid
+\import Set.Category
+\import Algebra.Group.Representation.Sub
+
+\record InterwiningMap {R : Ring} {G : Group} (Dom : LinRepres R G) (Cod : LinRepres R G) {
+  | \coerce func : LinearMap Dom Cod
+  | func-** {e : Dom} {g : G} : func (g Dom.** e) = g Cod.** func e -- equivariance
+}
+\class check{
+\func R : Ring => {?}
+
+\func G : Group => {?}
+
+\func E : LinRepres R G => {?}
+
+\func E1 : LinRepres R G => {?}
+
+}
+
+
+\instance RepresentationCat (R : Ring) (G : Group) : Cat (LinRepres R G)
+  | Hom A B => InterwiningMap A B
+  | id X => id-interwining X -- TODO
+  | o {x y z : LinRepres R G} (g : InterwiningMap y z) (f : InterwiningMap x y) => \new InterwiningMap x z {
+    | func (a : x) => g (f a) -- TODO
+    | func-** {a : x} {h : G} =>
+      g ( f (h ** a)) ==< pmap g func-** >==
+      g (h ** f a) ==< func-** >==
+      h ** (g (f a)) `qed
+  }
+  | id-left => idp
+  | id-right => idp
+  | o-assoc => idp
+  | univalence => sip \lam e _ => exts \lam g x => func-** {e}
+
+
+\lemma Schur's-Lemma {R : Ring} {G : Group} => {?}
