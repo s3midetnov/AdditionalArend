@@ -1,7 +1,7 @@
 \import Algebra.Group
 \import Algebra.Group.Category
 \import Algebra.Group.Representation.Category
-\import Algebra.Group.Representation.LRepresentation
+\import Algebra.Group.Representation.Representation
 \import Algebra.Group.Sub
 \import Algebra.Meta
 \import Algebra.Module
@@ -24,7 +24,7 @@
 \import Set
 \import Algebra.Monoid
 \import Algebra.Group.Representation.LinearAlgFacts
-\open Algebra.Group.Representation.LRepresentation
+\open Algebra.Group.Representation.Representation
 
 
 \class SubRepresentation {R : Ring} {G : Group} (E : LinRepres R G) {

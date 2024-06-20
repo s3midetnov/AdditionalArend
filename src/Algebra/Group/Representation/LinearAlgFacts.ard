@@ -40,7 +40,7 @@
   }
 
 \func isTrivial {R : Ring} {E : LModule R} (S : SubLModule R E)
-  => \Sigma (\Pi (v : E) -> S.contains v -> v = 0) (\Pi (v : E) -> S.contains v) -- trivial subrepresentation
+  => \Sigma (\Pi (v : E) -> S.contains v -> v = 0) (\Pi (v : E) -> S.contains v)
 
 \func OneDimSubmod-isNot-Trivial {R : Ring} {L : LModule R}(v : L)(p : Not (v = 0)) :
   Not (isTrivial (OneDimSubmod v)) => {?}

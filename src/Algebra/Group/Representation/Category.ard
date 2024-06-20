@@ -1,6 +1,6 @@
 \import Algebra.Group
 \import Algebra.Group.Representation.GSet
-\import Algebra.Group.Representation.LRepresentation
+\import Algebra.Group.Representation.Representation
 \import Algebra.Group.Sub
 \import Algebra.Meta
 \import Algebra.Module

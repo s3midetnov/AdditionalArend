@@ -1,6 +1,6 @@
 \import Algebra.Group
 \import Algebra.Group.Representation.GSet
-\import Algebra.Group.Representation.LRepresentation
+\import Algebra.Group.Representation.Representation
 \import Algebra.Group.Representation.LinearAlgFacts
 \import Algebra.Group.Representation.Sub
 \import Algebra.Group.Sub
@@ -37,7 +37,8 @@
       | **-assoc => ext (\lam j => rewrite (X.**-assoc, inverse_prod) idp)
       | id-action => ext (\lam j => rewrite (G.inverse_ide, X.id-action) idp)
       | lin => idp
-      \where \func inverse_prod {m n : G} : inverse (m * n) = inverse n * inverse m =>  {?}
+      \where \func inverse_prod {m n : G} : inverse (m * n) = inverse n * inverse m
+        =>  inv (G.check-for-inv( rewrite (G.*-assoc, pmap (\lam z => m * z) (inv G.*-assoc) , G.inverse-right, G.ide-left, G.inverse-right) idp))
 
   -- now we present an invariant subspace of permutation representation
 
