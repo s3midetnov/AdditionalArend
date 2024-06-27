@@ -1,0 +1,54 @@
+\import Algebra.Field
+\import Algebra.Field.AlgebraicClosure
+\import Algebra.Group
+\import Algebra.Group.Category
+\import Algebra.Group.Representation.GSet
+\import Algebra.Group.Sub
+\import Algebra.Meta
+\import Algebra.Module
+\import Algebra.Module.LinearMap
+\import Algebra.Module.Sub
+\import Algebra.Monoid
+\import Algebra.Monoid.Category
+\import Algebra.Monoid.Sub
+\import Algebra.Pointed
+\import Algebra.Ring
+\import Algebra.Semiring
+\import Arith.Nat
+\import Category
+\import Data.Array
+\import Equiv
+\import Function
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Paths
+\import Paths.Meta
+\import Prelude (::, =, Array, Fin, Nat, idp, nil, suc)
+\import Relation.Equivalence
+\import Set
+\import Algebra.Monoid
+\import Set.Category
+\open Data.Array
+
+\func FreeMonoid (S : \Set) : Monoid \cowith
+  | E => Array S
+  | ide => nil
+  | * (a1 : Array S) (a2 : Array S) => a1 ++ a2
+  | ide-left => idp
+  | ide-right => ++_nil
+  | *-assoc => ++-assoc
+
+
+\class AboveIsFree \noclassifying (S : \Set) (N : Monoid) (j : S -> N){
+  \func FM => FreeMonoid S
+
+  \func extensionMap (a : FM) : N \elim a
+    | Prelude.nil => N.ide
+    | a :: l => j a N.* extensionMap l
+
+  \func contMap : MonoidHom FM N \cowith
+    | func => extensionMap
+    | func-ide => idp
+    | func-* => {?}
+}
