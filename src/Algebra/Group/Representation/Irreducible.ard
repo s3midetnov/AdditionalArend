@@ -1,3 +1,5 @@
+\import Algebra.Field
+\import Algebra.Field.AlgebraicClosure
 \import Algebra.Group
 \import Algebra.Group.Category
 \import Algebra.Group.Representation.Category
@@ -16,7 +18,6 @@
 \import Arith.Nat
 \import Category
 \import Equiv
-\import Function
 \import Function.Meta ($)
 \import Logic
 \import Logic.Meta
@@ -30,17 +31,19 @@
 
 \class IrreducibleRepr {R : Ring} (G : Group) (\classifying  E : LinRepres R G){
   | irred : isIrreducible E
+
+  \func Non-Zero=>All {F : SubLinRepres E} (e : E) (prf : F.S.contains e) (prf-non-0 : e /= 0) : \Pi (e : E) -> F.S.contains e => {?}
 }
 \func auxillary-Lemma {A B : \Prop} (p : A || B)(q : Not A) : B => \case  p \with {
   | byLeft a => absurd (q a) -- everything follows from false
   | byRight b => b
 }
 
-\class Shur's-Lemma {R : Ring}{G : Group}{
+\class Shur's-Lemma-1 {R : Ring}{G : Group}{
  | E : IrreducibleRepr {R} G
  | E' : IrreducibleRepr {R} G
  | f : InterwiningMap E E'
- | non-zero-repr : ∃(e : E) (e /= 0)
+ | non-zero-repr : ∃(e : E) (e /= 0) -- not required, TODO : fix
 
  \func Ker : SubLModule R E => Kernel-SubM f
  \func Im : SubLModule R E' => Image-SubM f
@@ -54,13 +57,23 @@
 \lemma ZeroKer-FullImage==>Iso
    (p : \Pi(v : E) -> Ker.contains v -> v = 0) (q : \Pi (v : E') -> Im.contains v) : Iso f => {?}
 
-  \func Schur's-Lemma : isZeroMap f || Iso f => \case kernel-is-trivial \with {
+  \func Schur's-Lemma-1 : isZeroMap f || Iso f => \case kernel-is-trivial \with {
     | byLeft zero-subm => byRight (ZeroKer-FullImage==>Iso zero-subm (Im/=0-then-Im=All (ZeroKernel=>NonZeroIm zero-subm)))
     | byRight all-subm => byLeft (AllIsKernel=>ZeroMap all-subm)
   }
 
  \func kernel-is-trivial : isTrivial (Kernel-SubM f) => E.irred (KernelSubRepr f)
   \func image-is-trivial : isTrivial (Image-SubM f) => E'.irred (ImageSubRepr f)
+}
+
+\class Schur's-Lemma-2{k : Field} (p : IsAlgebraicallyClosed k){G : Group} {
+  | E : IrreducibleRepr {k} G
+  | f : InterwiningMap E E
+
+
+
+  \func Schur's-Lemma-2 (p : Iso f) : ∃(lam : k)(\Pi (x : E) -> f x = lam *c x) => {?}
+
 }
 
 

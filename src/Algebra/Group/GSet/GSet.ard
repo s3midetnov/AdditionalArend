@@ -50,7 +50,7 @@
     | g, in~ a => in~ (g * a)
     | g, ~-equiv x y r => in~ (g * x) ==< H.invariant-right-multiplication (H.equivalence-to-1 r) >==
     in~ (g * x * (inverse x * y)) ==< pmap in~ (trivialRelation g x y ) >== in~ (g * y) `qed
-  }
+    }
   | **-assoc {m n : G} {e : H.Cosets} : m ** (n ** e) = (m * n) ** e => \case \elim e \with{
     | in~ a =>  m ** (n ** in~ a) ==< pmap (m **) {n ** in~ a} {in~ (n * a)} idp >==
     m ** in~ (n * a) ==< idp >==
@@ -72,15 +72,15 @@
 
 
 \instance TransitiveActionBySubgroup {G : Group} (H : SubGroup G) : TransitiveGroupAction G
-  | GroupAction => ActionBySubgroup H
-  | trans (v v' : H.Cosets) : ∃ (g : G) (g ActionBySubgroup.** v = v') => \case \elim v, \elim v'\with{
-    | in~ a, in~ a1 => inP(a1 * inverse a ,
-                           in~ (a1 * inverse a * a) ==< pmap in~ *-assoc >==
-                           in~ (a1 * (inverse a * a)) ==< pmap (\lam z => in~ (a1 * z)) inverse-left >==
-                           in~ (a1 * ide) ==< pmap in~ ide-right >==
-                           in~ a1 `qed
-    )
-  }
+   | GroupAction => ActionBySubgroup H
+   | trans (v v' : H.Cosets) : ∃ (g : G) (g ActionBySubgroup.** v = v') => \case \elim v, \elim v'\with{
+      | in~ a, in~ a1 => inP(a1 * inverse a ,
+                              in~ (a1 * inverse a * a) ==< pmap in~ *-assoc >==
+                              in~ (a1 * (inverse a * a)) ==< pmap (\lam z => in~ (a1 * z)) inverse-left >==
+                              in~ (a1 * ide) ==< pmap in~ ide-right >==
+                              in~ a1 `qed
+                           )
+   }
 
 -- action by conjugating its own elements
 \func conjAction (G : Group) : GroupAction G \cowith

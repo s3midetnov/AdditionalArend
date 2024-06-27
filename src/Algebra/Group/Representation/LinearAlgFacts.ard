@@ -1,3 +1,5 @@
+\import Algebra.Field
+\import Algebra.Field.AlgebraicClosure
 \import Algebra.Group
 \import Algebra.Group.Representation.GSet
 \import Algebra.Group.Sub
@@ -27,6 +29,12 @@
 
 \func isZeroMap {R : Ring} {A B : LModule R} (f : LinearMap A B) => \Pi (a : A) -> f a = 0
 
+\func FunctorialPowerLMod{R : Ring} {M : LModule R} {I J : BaseSet} (f : SetHom I J) :
+  LinearMap (PowerLModule J M) (PowerLModule I M) \cowith
+  | func e => \lam j => e (f j)
+  | func-+ => ext (\lam _ => idp)
+  | func-*c => ext (\lam _ => idp)
+
 \func OneDimSubmod{R : Ring} {L : LModule R} (v : L) : SubLModule R L \cowith
   | contains u => ∃(r : R)(r *c v = u)
   | contains_zro => inP(0, L.*c_zro-left)
@@ -40,7 +48,7 @@
     | inP r => inP(a * r.1, rewrite (L.*c-assoc, r.2) idp)
   }
 
-\func isTrivial {R : Ring} {E : LModule R} (S : SubLModule R E)
+\func isTrivial {R : Ring} {E : LModule R} (S : SubLModule R E) : \Prop
   => (\Pi (v : E) -> S.contains v -> v = 0) ||  (\Pi (v : E) -> S.contains v)
 
 \func OneDimSubmod-isNot-Trivial {R : Ring} {L : LModule R}(v : L)(p : Not (v = 0)) :
@@ -67,3 +75,17 @@
   | contains_*c {c} p => \case \elim p \with {
     | inP p => inP (c *c p.1, rewrite (f.func-*c, p.2) idp)
   }
+
+
+
+
+\class LinearAlgebraOverAlgebraicallyClosed \noclassifying (k : Ring) (p : IsAlgebraicallyClosed k){
+
+  -- add nontriviality condition
+  \func isSubEigenspace {V : LModule k} {M : LinearMap V V} (E : SubLModule k V) (lam : k)
+     => \Pi(e : V) -> E.contains e -> M e = lam *c e
+}
+
+\func EigenSubSpace (k : Field) (p : IsAlgebraicallyClosed k) (V : LModule k)(f : LinearMap V V) :
+  \Sigma (E : SubLModule k V) (Not (isTrivial E)) (∃(lam : k)(\Pi (e : V) -> E.contains e -> f e = lam *c e)) => {?}
+

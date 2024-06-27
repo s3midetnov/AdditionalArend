@@ -1,17 +1,21 @@
 \import Algebra.Group
-\import Algebra.Group.Representation.GSet
+\import Algebra.Group.Representation.Category
+\import Algebra.Group.GSet.GSet
+\import Algebra.Group.GSet.Category
 \import Algebra.Group.Representation.Representation
 \import Algebra.Group.Representation.LinearAlgFacts
 \import Algebra.Group.Representation.Sub
 \import Algebra.Group.Sub
 \import Algebra.Meta
 \import Algebra.Module
+\import Algebra.Module.LinearMap
 \import Algebra.Module.Sub
 \import Algebra.Monoid
 \import Algebra.Monoid.Sub
 \import Algebra.Pointed
 \import Algebra.Ring
 \import Arith.Nat
+\import Category.Functor
 \import Equiv
 \import Function
 \import Function.Meta ($)
@@ -24,48 +28,67 @@
 \import Algebra.Monoid
 \import Set.Category
 
-\class PermutationRepr \noclassifying {R : Ring} {G : Group} (X : GroupAction G) {
-    | somepoint : X
 
+{- | Action given as $$g \cdot \left( \sum \lambda_i x_i \right) := \sum \lambda_{g^{-1}(i)}x_i $$  for a basis of $x_i$'s -} -}
+\func PermRepr {R : Ring} {G : Group} (X : GroupAction G) : LinRepres R G \cowith
+  | E : LModule => Module
+  | ** g f j => f (inverse g X.** j)
+  | **-assoc => ext (\lam j => rewrite (X.**-assoc, inverse_prod) idp)
+  | id-action => ext (\lam j => rewrite (G.inverse_ide, X.id-action) idp)
+  | lin => idp
+  | lin-*c => ext (\lam j => idp)
+  \where{
+    \func inverse_prod {m n : G} : inverse (m * n) = inverse n * inverse m =>
+      inv (G.check-for-inv ( rewrite (G.*-assoc, pmap (\lam z => m * z) (inv G.*-assoc) , G.inverse-right, G.ide-left, G.inverse-right) idp))
     \func R_m : LModule R => RingLModule R
     \func Module : LModule R => PowerLModule X R_m -- product module of |X| copies of R
+  }
 
-  {- | Action given as $$g \cdot \left( \sum \lambda_i x_i \right) := \sum \lambda_{g^{-1}(i)}x_i $$ -} -}
-    \func Repr : LinRepres R G \cowith
-      | E : LModule => Module
-      | ** g f j => f (inverse g X.** j)
-      | **-assoc => ext (\lam j => rewrite (X.**-assoc, inverse_prod) idp)
-      | id-action => ext (\lam j => rewrite (G.inverse_ide, X.id-action) idp)
-      | lin => idp
-      \where \func inverse_prod {m n : G} : inverse (m * n) = inverse n * inverse m
-        =>  inv (G.check-for-inv( rewrite (G.*-assoc, pmap (\lam z => m * z) (inv G.*-assoc) , G.inverse-right, G.ide-left, G.inverse-right) idp))
+\func PermReprOnMaps {R : Ring} {G : Group} {X Y : GroupAction G} (f : EquivariantMap G X Y) :
+  InterwiningMap (PermRepr {R} Y) (PermRepr X) \cowith
+  | func : LinearMap (PermRepr {R} Y) (PermRepr X) => FunctorialPowerLMod f
+  | func-** {e} {g} => {?}
+
+\func PermReprFunctor {R : Ring} {G : Group} : Functor (GSet G) (RepresentationCat R G) \cowith
+  | F X => PermRepr X
+  | Func f => {?} -- PermReprOnMaps f
+  | Func-id => {?}
+  | Func-o => {?}
+
+
+
+
+\class PermutationRepresReducible {R : Ring} {G : Group} (X : GroupAction G) {
+  | somepoint : X
+
+  \func R_m : LModule R => RingLModule R
+  \func Module : LModule R => PowerLModule X R_m -- product module of |X| copies of R
+  \func Repr : LinRepres R G => PermRepr {R} {G} X
+
 
   -- now we present an invariant subspace of permutation representation
 
   \func Span-submod : SubLModule R Module => OneDimSubmod (\lam _ => R.ide)
+
   \func form-of-element (v : Module) : ∃(r : R) (\Pi (j : X) -> v j = r) -> Span-submod.contains v  => {?}
-
-
 
   --  ∃(r : R)(r *c v = u)
   \func Span-submod-Is-Fixed :
-      \Pi(x : Module)(g : G) -> Span-submod.contains x -> g Repr.** x = x
-      => \lam (x : Module) (g : G) (p : Span-submod.contains x) => ext (\lam j => rewrite () {?})
---          \where \func helper (v : Module) (p : ∃(r : R)(r *c v = u))
+    \Pi(x : Module)(g : G) -> Span-submod.contains x -> g Repr.** x = x
+    => \lam (x : Module) (g : G) (p : Span-submod.contains x) => ext (\lam j => rewrite () {?})
+  --          \where \func helper (v : Module) (p : ∃(r : R)(r *c v = u))
 
-  \func Span-submod-Is-Invariant : SubRepresentation Repr => fixed=>invariant Span-submod Span-submod-Is-Fixed
+  \func Span-submod-Is-Invariant : SubLinRepres Repr => fixed=>invariant Span-submod Span-submod-Is-Fixed
 
-  \func Span-submod-Is-Invariant' : SubRepresentation Repr \cowith
+  \func Span-submod-Is-Invariant' : SubLinRepres Repr \cowith
     | S => Span-submod
     | invariance => \lam {e}{g} p => \case \elim p \with{
       | inP r1_r2 => form-of-element (g Repr.** e) (inP (r1_r2.1, \lam j => rewrite () {?}))
     }
 
-    \func Span-submod-not-trivial : Not (isTrivial Span-submod) => {?}
+  \func Span-submod-not-trivial : Not (isTrivial Span-submod) => {?}
 
   {- | $span (1, 1, \ldots)^T$ is an invariant subspace => permutation representation is not irreducible -}
   \func Permutation-Repr-Reducible : Not (isIrreducible Repr) =>
     \lam proof-irred => Span-submod-not-trivial (proof-irred Span-submod-Is-Invariant)  -- Span-submod-not-trivial proof-irred
 }
-
-

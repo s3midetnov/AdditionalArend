@@ -1,0 +1,75 @@
+\import Algebra.Field
+\import Algebra.Field.AlgebraicClosure
+\import Algebra.Group
+\import Algebra.Group.Category
+\import Algebra.Group.Presentation.FreeMonoid
+\import Algebra.Group.Representation.GSet
+\import Algebra.Group.Sub
+\import Algebra.Meta
+\import Algebra.Module
+\import Algebra.Module.LinearMap
+\import Algebra.Module.Sub
+\import Algebra.Monoid
+\import Algebra.Monoid.Category
+\import Algebra.Monoid.Sub
+\import Algebra.Pointed
+\import Algebra.Ring
+\import Algebra.Semiring
+\import Arith.Nat
+\import Category
+\import Data.Array
+\import Data.Bool
+\import Equiv
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Paths
+\import Paths.Meta
+\import Prelude (::, =, Array, Fin, Nat, idp, nil, suc)
+\import Relation.Equivalence
+\import Set
+\import Algebra.Monoid
+\import Set.Category
+\open Data.Array
+
+\func FreeGroup (S : \Set) : Group \cowith
+  | E => Quotient (equivWords.~)
+  | ide => in~ nil
+  | * a b => \case \elim a, \elim b \with {
+    | in~ a, in~ b => in~ (a W.* b)
+    | in~ a, ~-equiv x y r =>
+      \case \elim r \with {
+      | Equivalence.cin (r : areAdjacent x y) => Quotient.fromEquality {?}
+      | Equivalence.crefl p => {?}
+      | Equivalence.csym c => {?}
+      | Equivalence.ctrans c c1 => {?}
+    }
+    | ~-equiv x y r i, in~ a => {?}
+  }
+  | ide-left => {?}
+  | ide-right => {?}
+  | *-assoc => {?}
+  | inverse => {?}
+  | inverse-left => {?}
+  | inverse-right => {?}
+  \where {
+    \func S_S' : \Set => \Sigma S Bool
+
+    \func j (s : S) : S_S' => (s, true)
+    \func j-inv (s : S) : S_S' => (s, false)
+
+    \func W : Monoid => FreeMonoidConstr S_S'
+
+    \func areAdjacent1 (w_1 w_2 : W) =>
+      ∃(u_1 u_2 : W) (∃ (x : S) (\Sigma(w_1 = u_1 W.* letter {S_S'} (x, true) W.* letter {S_S'} (x, false) W.* u_2) (w_2 = u_1 W.* u_2)))
+
+    \func areAdjacent2 (w_1 w_2 : W) =>
+      ∃(u_1 u_2 : W) (∃ (x : S) (\Sigma(w_1 = u_1 W.* letter {S_S'} (x, false) W.* letter {S_S'} (x, true) W.* u_2) (w_2 = u_1 W.* u_2)))
+
+    \func areAdjacent (w_1 w_2 : W) => areAdjacent1 w_1 w_2 || areAdjacent2 w_1 w_2
+
+    \func equivWords : Equivalence W => Equivalence.Closure.isEquivalence areAdjacent
+
+  }
+
+

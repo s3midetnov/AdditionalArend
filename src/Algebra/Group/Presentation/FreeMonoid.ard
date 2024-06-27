@@ -2,7 +2,6 @@
 \import Algebra.Field.AlgebraicClosure
 \import Algebra.Group
 \import Algebra.Group.Category
-\import Algebra.Group.Representation.GSet
 \import Algebra.Group.Sub
 \import Algebra.Meta
 \import Algebra.Module
@@ -18,20 +17,23 @@
 \import Category
 \import Data.Array
 \import Equiv
-\import Function
+\import Function (isInj, isSurj)
 \import Function.Meta ($)
 \import Logic
 \import Logic.Meta
+\import Meta
 \import Paths
 \import Paths.Meta
-\import Prelude (::, =, Array, Fin, Nat, idp, nil, suc)
+\import Prelude (::, =, Array, Fin, Nat, idp, nil, path, suc)
 \import Relation.Equivalence
 \import Set
 \import Algebra.Monoid
 \import Set.Category
 \open Data.Array
 
-\func FreeMonoid (S : \Set) : Monoid \cowith
+
+
+\func FreeMonoidConstr (S : \Set) : Monoid \cowith
   | E => Array S
   | ide => nil
   | * (a1 : Array S) (a2 : Array S) => a1 ++ a2
@@ -39,16 +41,99 @@
   | ide-right => ++_nil
   | *-assoc => ++-assoc
 
+\func letter{S : \Set} : S -> FreeMonoidConstr S =>
+  \lam s => \new Array S {
+    | len => 1
+    | at i => \case\elim i \with {
+      | 0 => s
+    }
+  }
 
-\class AboveIsFree \noclassifying (S : \Set) (N : Monoid) (j : S -> N){
-  \func FM => FreeMonoid S
+\func contMap {S : \Set} (N : Monoid) (j : S -> N): MonoidHom (FreeMonoidConstr S) N \cowith
+  | func => extnsn -- extensionMap N j
+  | func-ide => idp
+  | func-* {x y : FreeMonoidConstr S} => helper
+\where{
 
-  \func extensionMap (a : FM) : N \elim a
+  \func Free : Monoid => FreeMonoidConstr S
+
+  \func extnsn  (a : FreeMonoidConstr S): N \elim a
     | Prelude.nil => N.ide
-    | a :: l => j a N.* extensionMap l
+    | a :: l => j a N.*  extnsn l
 
-  \func contMap : MonoidHom FM N \cowith
-    | func => extensionMap
-    | func-ide => idp
-    | func-* => {?}
+    -- TODO: replace this with correct recursion
+    \func helper{x y : FreeMonoidConstr S} : extnsn (x Free.* y) = extnsn x N.* extnsn y => \case \elim x \with {
+      | nil => rewrite N.ide-left idp
+      | a :: l => \let s => helper {S} {N} {j} {l} {y} \in rewrite (N.*-assoc, s) idp -- rewrite (N.*-assoc, helper {S} {N} {j} {l} {y}) idp
+    }
 }
+
+\func maponLetters{S : \Set} (N : Monoid) (j : S -> N) : \Pi (s : S) -> (contMap N j) (letter s) = j s => {?}
+
+
+
+\class FreeMonoid (S : \Set) (\classifying M : Monoid){
+  | i : S -> M
+  | extension (N : Monoid) (j : S -> N) : \Sigma(f : MonoidHom M N)(\Pi(s : S) -> f (i s) = j s)
+  | extension-unique (N : Monoid) (j : S -> N) (g : MonoidHom M N)
+  (p : \Pi(s : S) -> g (i s) = j s) : \Pi(m : M) -> (extension N j).1  m = g m
+}
+
+-- TODO: replace with Equiv
+\func isIso {M N : Monoid}(f : MonoidHom M N) : \Prop => ∃(g : MonoidHom N M) (\Sigma (f MonoidCat.∘ g = id N)(g MonoidCat.∘ f = id M)) -- TODO: check if there is a proper way to do this
+
+\func UniquenessFreeMono-simpler (S : \Set)(M N : FreeMonoid S) : \Sigma(f : MonoidHom M N)(isIso f)
+  => ( f , inP (g, (id-criterion N (f MonoidCat.∘ g) \lam (j : S) => rewrite (pmap f (g-coherence j), f-coherence j) idp,
+                    id-criterion M (g MonoidCat.∘ f) \lam (j : S) => rewrite (pmap g (f-coherence j), g-coherence j) idp)) )
+\where {
+  \lemma id-criterion (A : FreeMonoid S)(s : MonoidHom A A)(p : \Pi(j : S) -> s (i j) = i j) : s = MonoidCat.id A => {?}
+  \func f : MonoidHom M N => (M.extension N N.i).1
+  \func g : MonoidHom N M => (N.extension M M.i).1
+
+  \func f-coherence : \Pi (s : S) -> f (M.i s) = N.i s => (M.extension N N.i).2
+  \func g-coherence : \Pi (s : S) -> g (N.i s) = M.i s => (N.extension M M.i).2
+}
+
+
+\func FreeMono-isUnique (S S' : \Set)(set-fun : S -> S')(set-iso : Equiv set-fun) (M : FreeMonoid S) (M' : FreeMonoid S') :
+  \Sigma (f : MonoidHom M M')(isIso f) => UniquenessFreeMono-simpler S M FreeMonoPullBack
+\where {
+  \func FreeMonoPullBack : FreeMonoid S {| M => M'} => {?}
+}
+
+
+
+
+
+\func ListFreeMonoid (S : \Set) : FreeMonoid S \cowith
+  | M => FreeMonoidConstr S
+  | i => letter
+  | extension N j => (contMap N j, maponLetters N j ) -- rewrite () {?})
+  | extension-unique => {?}
+--\func isFreeMonoid (S : \Set)(M : Monoid)(i : S -> M) => \Pi(N : Monoid)(j : S -> N) -> ExtendsMonoidAndSet S M i N j
+
+
+\func isGeneratedBy-AsMonoid (M : Monoid) (S : \Set) (j : S -> M) => isSurj (contMap {S} M j)
+
+\func NatMonoid : Monoid \cowith
+  | E => Nat
+  | ide => Nat.zero
+  | * => Nat.+
+  | ide-left => idp
+  | ide-right => idp
+  | *-assoc => NatSemiring.+-assoc
+
+\func Singleton : \Set => Fin 1
+\func zro : Singleton => 0
+
+\func FreeCyclicMonoid : Monoid => FreeMonoidConstr Singleton
+
+\func Nat->Cyclic : MonoidHom NatMonoid FreeCyclicMonoid \cowith
+  | func n => mkArray {Singleton} {n} (\lam _ => zro)
+  | func-ide =>  idp -- len=0
+  | func-* =>  {?}
+
+\func Cyclic->Nat : MonoidHom FreeCyclicMonoid NatMonoid \cowith
+  | func => \lam e => {?}
+  | func-ide => {?}
+  | func-* => {?}

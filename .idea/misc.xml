@@ -18,5 +18,6 @@
       </ArendPrintingOptions>
     </option>
     <option name="showImplicitGoals" value="true" />
+    <option name="showNonImplFields" value="false" />
   </component>
 </project>

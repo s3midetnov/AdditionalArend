@@ -3,12 +3,15 @@
 \import Algebra.Group.Sub
 \import Algebra.Meta
 \import Algebra.Module
+\import Algebra.Module.Category
+\import Algebra.Module.LinearMap
 \import Algebra.Module.Sub
 \import Algebra.Monoid
 \import Algebra.Monoid.Sub
 \import Algebra.Pointed
 \import Algebra.Ring
 \import Arith.Nat
+\import Category
 \import Equiv
 \import Function
 \import Function.Meta ($)
@@ -23,14 +26,40 @@
 
 -- basic reference right now is https://www.uni-math.gwdg.de/tammo/rep.pdf
 -- REPRESENTATION THEORY Tammo tom Dieck
+-- https://www.maths.dur.ac.uk/users/jack.g.shotton/repthy/index.html
 
 \class LinRepres (R : Ring) (G : Group) (\classifying E : LModule R){
   | \infixl 8 ** : G -> E -> E
   | **-assoc {m n : G} {e : E} : m ** (n ** e) = (m * n) ** e
   | id-action {e : E} : ide ** e = e
-  | lin {g : G} {e e' : E} : g ** (e + e') = g ** e + g ** e'
+  | lin {g :  G} {e e' : E} : g ** (e + e') = g ** e + g ** e'
+  | lin-*c {g :  G} {e : E} {c : R} : g ** (c *c e) = c *c (g ** e)
 
-  \func g**-zro {g : G} : g ** 0 = 0 => {?}
+  -- TODO : must be re-done using library
+  \func g**-zro {g : G} : g ** 0 = 0 => rewrite (inv (E.*c_zro-right {0}), lin-*c, E.*c_zro-left, E.*c_zro-left) idp
+
+  \func pi (g : G) : LinearMap E E \cowith
+    | func e => g ** e
+    | func-+ => lin
+    | func-*c => lin-*c
+
+  \func id-image : pi G.ide = id E => {?}
+
+  \func compose {g h : G} : pi (g * h) =  (pi g) ∘ {LModuleCat R} (pi h) => {?}
+
+  \func pi-isIso (g : G) : Iso {LModuleCat R}(pi g) \cowith
+    | hinv => pi (inverse g)
+    | hinv_f => rewrite (inv compose, G.inverse-left, id-image) idp
+    | f_hinv => rewrite (inv compose, G.inverse-right, id-image) idp
+}
+
+
+
+\class LinRepres' (R : Ring) (G : Group) (\classifying E : LModule R){
+  | act : GroupAction G E
+  | lin {g : G} {e e' : E} : g act.** (e + e') = g act.** e + g act.** e'
+
+  \func g**-zro {g : G} : g act.** 0 = 0 => {?}
 }
 
 
