@@ -31,8 +31,6 @@
 \import Set.Category
 \open Data.Array
 
-
-
 \func FreeMonoidConstr (S : \Set) : Monoid \cowith
   | E => Array S
   | ide => nil
@@ -102,38 +100,12 @@
 }
 
 
-
-
-
 \func ListFreeMonoid (S : \Set) : FreeMonoid S \cowith
   | M => FreeMonoidConstr S
   | i => letter
   | extension N j => (contMap N j, maponLetters N j ) -- rewrite () {?})
   | extension-unique => {?}
---\func isFreeMonoid (S : \Set)(M : Monoid)(i : S -> M) => \Pi(N : Monoid)(j : S -> N) -> ExtendsMonoidAndSet S M i N j
+
 
 
 \func isGeneratedBy-AsMonoid (M : Monoid) (S : \Set) (j : S -> M) => isSurj (contMap {S} M j)
-
-\func NatMonoid : Monoid \cowith
-  | E => Nat
-  | ide => Nat.zero
-  | * => Nat.+
-  | ide-left => idp
-  | ide-right => idp
-  | *-assoc => NatSemiring.+-assoc
-
-\func Singleton : \Set => Fin 1
-\func zro : Singleton => 0
-
-\func FreeCyclicMonoid : Monoid => FreeMonoidConstr Singleton
-
-\func Nat->Cyclic : MonoidHom NatMonoid FreeCyclicMonoid \cowith
-  | func n => mkArray {Singleton} {n} (\lam _ => zro)
-  | func-ide =>  idp -- len=0
-  | func-* =>  {?}
-
-\func Cyclic->Nat : MonoidHom FreeCyclicMonoid NatMonoid \cowith
-  | func => \lam e => {?}
-  | func-ide => {?}
-  | func-* => {?}

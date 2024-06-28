@@ -142,6 +142,7 @@ public class StdExtension implements ArendExtension {
   public void declareDefinitions(@NotNull DefinitionContributor contributor) {
     ModulePath meta = new ModulePath("Meta");
     contributor.declare(meta, new LongName("later"), "`later meta args` defers the invocation of `meta args`", Precedence.DEFAULT, laterMeta);
+    contributor.declare(meta, new LongName("MyTestMeta"), "`ahah`", Precedence.DEFAULT, new MyTestMeta(this));
     contributor.declare(meta, new LongName("fails"),
       """
         `fails meta args` succeeds if and only if `meta args` fails
