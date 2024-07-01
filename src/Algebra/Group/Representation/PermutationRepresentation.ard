@@ -21,6 +21,7 @@
 \import Function.Meta ($)
 \import Logic
 \import Logic.Meta
+\import Meta
 \import Paths
 \import Paths.Meta
 \import Relation.Equivalence
@@ -44,49 +45,65 @@
     \func Module : LModule R => PowerLModule X R_m -- product module of |X| copies of R
   }
 
-\func PermReprOnMaps {R : Ring} {G : Group} {X Y : GroupAction G} (f : EquivariantMap G X Y) :
-  InterwiningMap (PermRepr {R} Y) (PermRepr X) \cowith
-  | func : LinearMap (PermRepr {R} Y) (PermRepr X) => FunctorialPowerLMod f
-  | func-** {e} {g} => {?}
-
-\func PermReprFunctor {R : Ring} {G : Group} : Functor (GSet G) (RepresentationCat R G) \cowith
-  | F X => PermRepr X
-  | Func f => {?} -- PermReprOnMaps f
-  | Func-id => {?}
-  | Func-o => {?}
-
-
-
-
+{- |
+Here we prove that $span(1, 1, \ldots)$ is an invariant and non-trivial subspace in $\prod_X R$ as an $R$-module.
+For this proof to work one needs to know that there are at least two points in $X$.
+Also, this does not make much sense over a trivial ring, thus we eliminate this case as well.
+ -}
 \class PermutationRepresReducible {R : Ring} {G : Group} (X : GroupAction G) {
   | somepoint : X
+  | somepoint' : X
+  | different-points : somepoint /= somepoint'
+  | not-trivial-ring : R.zro /= R.ide
+  | decideEq-somepoint (x : X) : Dec (x = somepoint)
 
+  -- basic definitions to work easier
   \func R_m : LModule R => RingLModule R
   \func Module : LModule R => PowerLModule X R_m -- product module of |X| copies of R
   \func Repr : LinRepres R G => PermRepr {R} {G} X
-
+  \func vectorOnes : Module => \lam _ => R.ide
 
   -- now we present an invariant subspace of permutation representation
+  \func Span-submod : SubLModule R Module => OneDimSubmod vectorOnes
 
-  \func Span-submod : SubLModule R Module => OneDimSubmod (\lam _ => R.ide)
+  -- it is not used
+  \func constCoordinates=>contains (v : Module) : ∃ (r : R) (\Pi (j : X) -> v j = r) -> Span-submod.contains v  => \lam z =>  \case \elim z \with {
+    | inP a => inP (a.1, ext (\lam j => rewrite (R.ide-right, a.2) idp))
+  }
 
-  \func form-of-element (v : Module) : ∃(r : R) (\Pi (j : X) -> v j = r) -> Span-submod.contains v  => {?}
+  \func contains=>constCoordinates(x : Module) (p : Span-submod.contains x) (j_1 j_2 : X) : (x j_1) = (x j_2) => \case \elim p \with {
+    | inP proof => rewrite (inv proof.2) idp
+  }
 
-  --  ∃(r : R)(r *c v = u)
   \func Span-submod-Is-Fixed :
     \Pi(x : Module)(g : G) -> Span-submod.contains x -> g Repr.** x = x
-    => \lam (x : Module) (g : G) (p : Span-submod.contains x) => ext (\lam j => rewrite () {?})
-  --          \where \func helper (v : Module) (p : ∃(r : R)(r *c v = u))
+    => \lam (x : Module) (g : G) (p : Span-submod.contains x) => ext (\lam j => rewrite (aux x p j (inverse g ** j)) idp)
+  \where \func aux (x : Module) (p : Span-submod.contains x) (j_1 j_2 : X) : (x j_1) = (x j_2) => \case \elim p \with {
+    | inP proof => rewrite (inv proof.2) idp
+  }
+
 
   \func Span-submod-Is-Invariant : SubLinRepres Repr => fixed=>invariant Span-submod Span-submod-Is-Fixed
 
-  \func Span-submod-Is-Invariant' : SubLinRepres Repr \cowith
-    | S => Span-submod
-    | invariance => \lam {e}{g} p => \case \elim p \with{
-      | inP r1_r2 => form-of-element (g Repr.** e) (inP (r1_r2.1, \lam j => rewrite () {?}))
-    }
 
-  \func Span-submod-not-trivial : Not (isTrivial Span-submod) => {?}
+  --  (\Pi (v : E) -> S.contains v -> v = 0) ||  (\Pi (v : E) -> S.contains v)
+  \func Span-submod-not-trivial : Not (isTrivial Span-submod) => \lam (p : isTrivial Span-submod) => \case p \with {
+    | byLeft every-zero => not-trivial-ring (rewrite (pmap (\lam f => f somepoint) (every-zero vectorOnes auxillary), auxillary-2) idp)
+    | byRight all-module => auxillary-3.2 (all-module auxillary-3.1)
+  }\where{
+    \func auxillary : Span-submod.contains vectorOnes => inP (R.ide, Module.ide_*c)
+    \func auxillary-2 : Module.zro somepoint = R.zro => idp
+    \func build-vector (x : X) : R => \case decideEq-somepoint x \with {
+      | yes e => R.ide
+      | no n => R.zro
+    }
+    \func triv-1 : build-vector somepoint = R.ide => {?}
+    \func triv-2 : build-vector somepoint' = R.zro => {?} -- rewrite () {?}
+    \func auxillary-3 : \Sigma (v : Module)(Not (Span-submod.contains v)) =>
+      (build-vector,
+       \lam p => not-trivial-ring (rewrite (inv triv-1, inv triv-2) (contains=>constCoordinates build-vector p somepoint' somepoint)) -- (contains=>constCoordinates build-vector p somepoint somepoint')
+     )
+  }
 
   {- | $span (1, 1, \ldots)^T$ is an invariant subspace => permutation representation is not irreducible -}
   \func Permutation-Repr-Reducible : Not (isIrreducible Repr) =>

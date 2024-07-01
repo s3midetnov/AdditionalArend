@@ -1,5 +1,5 @@
 \import Algebra.Group
-\import Algebra.Group.Representation.GSet
+\import Algebra.Group.GSet.GSet
 \import Algebra.Group.Sub
 \import Algebra.Meta
 \import Algebra.Module
@@ -10,6 +10,7 @@
 \import Algebra.Monoid.Sub
 \import Algebra.Pointed
 \import Algebra.Ring
+\import Algebra.Ring.MonoidRing
 \import Arith.Nat
 \import Category
 \import Equiv
@@ -53,8 +54,10 @@
     | f_hinv => rewrite (inv compose, G.inverse-right, id-image) idp
 }
 
+--\func GMod (R : Ring)(G : Group) => LModule (MonoidRing G R)
 
 
+{-
 \class LinRepres' (R : Ring) (G : Group) (\classifying E : LModule R){
   | act : GroupAction G E
   | lin {g : G} {e e' : E} : g act.** (e + e') = g act.** e + g act.** e'
@@ -62,4 +65,4 @@
   \func g**-zro {g : G} : g act.** 0 = 0 => {?}
 }
 
-
+-}
